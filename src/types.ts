@@ -5,7 +5,7 @@ import { Octokit } from ".";
 
 export type RequestParameters = OctokitTypes.RequestParameters;
 
-export type OctokitOptions = {
+export interface OctokitOptions {
   // TODO: add types for authStrategy & auth options and octokit.auth() method,
   //       see https://tinyurl.com/typescript-auth-strategies
   authStrategy?: any;
@@ -22,17 +22,17 @@ export type OctokitOptions = {
   request?: OctokitTypes.RequestRequestOptions;
   timeZone?: string;
   [option: string]: any;
-};
+}
 
 export type Constructor<T> = new (...args: any[]) => T;
 
-export type ReturnTypeOf<
-  T extends AnyFunction | AnyFunction[]
-> = T extends AnyFunction
-  ? ReturnType<T>
-  : T extends AnyFunction[]
-  ? UnionToIntersection<ReturnType<T[number]>>
-  : never;
+export type ReturnTypeOf<T extends AnyFunction | AnyFunction[]> =
+  T extends AnyFunction
+    ? ReturnType<T>
+    : T extends AnyFunction[]
+    ? // exclude `void` from intersection, see octokit/octokit.js#2115
+      UnionToIntersection<Exclude<ReturnType<T[number]>, void>>
+    : never;
 
 /**
  * @author https://stackoverflow.com/users/2887218/jcalz
@@ -53,7 +53,7 @@ export type OctokitPlugin = (
 
 export type Hooks = {
   request: {
-    Options: OctokitTypes.EndpointOptions;
+    Options: Required<OctokitTypes.EndpointDefaults>;
     Result: OctokitTypes.OctokitResponse<any>;
     Error: RequestError | Error;
   };
